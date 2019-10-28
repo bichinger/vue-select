@@ -383,7 +383,7 @@
       <ul ref="dropdownMenu" v-if="dropdownOpen" class="dropdown-menu" :style="{ 'max-height': maxHeight }" role="listbox" @mousedown="onMousedown" @mouseup="onMouseup">
         <li role="option" v-for="(option, index) in filteredOptions" v-bind:key="index" :class="{ active: isOptionSelected(option), highlight: index === typeAheadPointer }" @mouseover="typeAheadPointer = index">
           <span class="optgroup-header" v-if="option.optgroup">{{option.optgroup}}</span>
-          <a v-if="!option.optgroup" @mousedown.prevent.stop="select(option)">
+          <a v-if="!option.optgroup" @mousedown.prevent.stop="select(option)" :class="{ 'optgroup-member': option.inoptgroup }">
           <slot v-if="!option.optgroup" name="option" v-bind="(typeof option === 'object')?option:{[label]: option}">
             {{ getOptionLabel(option) }}
           </slot>
@@ -840,7 +840,13 @@
       normaliseOptGroups(val) {
         return val.map(item => {
           if (item.title && item.options && item.options instanceof Array) {
-            return [{optgroup : item.title}].concat(item.options)
+            return [{optgroup : item.title}].concat(item.options.map(groupitem => {
+              if(typeof groupitem !== 'object') {
+                groupitem = {[this.label]: groupitem}
+              }
+              groupitem.inoptgroup = true
+              return groupitem
+            }))
           } else {
             return [item]
           }
