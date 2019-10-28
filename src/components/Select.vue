@@ -229,10 +229,13 @@
   }
   .v-select li > a {
     display: block;
-    padding: 3px 20px;
+    padding: 3px 5px;
     clear: both;
     color: #333; /* Overrides most CSS frameworks */
     white-space: nowrap;
+  }
+  .v-select li > a.optgroup-member {
+    padding: 3px 20px;
   }
   .v-select li:hover {
     cursor: pointer;
