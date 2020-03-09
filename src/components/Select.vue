@@ -385,12 +385,23 @@
     <transition :name="transition">
       <ul ref="dropdownMenu" v-if="dropdownOpen" class="dropdown-menu" :style="{ 'max-height': maxHeight }" role="listbox" @mousedown="onMousedown" @mouseup="onMouseup">
         <li role="option" v-for="(option, index) in filteredOptions" v-bind:key="index" :class="{ active: isOptionSelected(option), highlight: index === typeAheadPointer }" @mouseover="typeAheadPointer = index">
-          <span class="optgroup-header" v-if="option.optgroup">{{option.optgroup}}</span>
-          <a v-if="!option.optgroup" @mousedown.prevent.stop="select(option)" :class="{ 'optgroup-member': option.inoptgroup }">
-          <slot v-if="!option.optgroup" name="option" v-bind="(typeof option === 'object')?option:{[label]: option}">
-            {{ getOptionLabel(option) }}
-          </slot>
-          </a>
+
+          <template v-if="option.optgroup">
+            <a v-if="option.value" @mousedown.prevent.stop="select(option)" class="optgroup-header">
+              <slot name="option" v-bind="option">
+                {{ getOptionLabel(option) }}
+              </slot>
+            </a>
+            <span v-else class="optgroup-header">{{option.optgroup}}</span>
+          </template>
+          <template v-else>
+            <a @mousedown.prevent.stop="select(option)" :class="{ 'optgroup-member': option.inoptgroup }">
+            <slot name="option" v-bind="(typeof option === 'object')?option:{[label]: option}">
+              {{ getOptionLabel(option) }}
+            </slot>
+            </a>
+          </template>
+
         </li>
         <li v-if="!filteredOptions.length" class="no-options" @mousedown.stop="">
           <slot name="no-options">Sorry, no matching options.</slot>
@@ -843,7 +854,7 @@
       normaliseOptGroups(val) {
         return val.map(item => {
           if (item.title && item.options && item.options instanceof Array) {
-            return [{optgroup : item.title}].concat(item.options.map(groupitem => {
+            return [{optgroup : true, label : item.title, value : item.option_values }].concat(item.options.map(groupitem => {
               if(typeof groupitem !== 'object') {
                 groupitem = {[this.label]: groupitem}
               }
