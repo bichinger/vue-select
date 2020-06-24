@@ -1,414 +1,457 @@
 <style>
-  .v-select {
-    position: relative;
-    font-family: inherit;
-  }
-  .v-select,
-  .v-select * {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-  }
+    .v-select {
+        position: relative;
+        font-family: inherit;
+    }
 
-  /* Rtl support - Because we're using a flexbox-based layout, the `dir="rtl"` HTML
-     attribute does most of the work for us by rearranging the child elements visually.
-   */
-  .v-select[dir="rtl"] .vs__actions {
-    padding: 0 3px 0 6px;
-  }
-  .v-select[dir="rtl"] .dropdown-toggle .clear {
-    margin-left: 6px;
-    margin-right: 0;
-  }
-  .v-select[dir="rtl"] .selected-tag .close {
-    margin-left: 0;
-    margin-right: 2px;
-  }
-  .v-select[dir="rtl"] .dropdown-menu {
-    text-align: right;
-  }
+    .v-select,
+    .v-select * {
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
 
-  /* Open Indicator */
-  .v-select .open-indicator {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    pointer-events: all;
-    transition: all 150ms cubic-bezier(1.000, -0.115, 0.975, 0.855);
-    transition-timing-function: cubic-bezier(1.000, -0.115, 0.975, 0.855);
-    opacity: 1;
-    width: 12px; /* To account for extra width from rotating. */
-  }
-  .v-select .open-indicator:before {
-    border-color: rgba(60, 60, 60, .5);
-    border-style: solid;
-    border-width: 3px 3px 0 0;
-    content: '';
-    display: inline-block;
-    height: 10px;
-    width: 10px;
-    vertical-align: text-top;
-    transform: rotate(133deg);
-    transition: all 150ms cubic-bezier(1.000, -0.115, 0.975, 0.855);
-    transition-timing-function: cubic-bezier(1.000, -0.115, 0.975, 0.855);
-    box-sizing: inherit;
-  }
-  /* Open Indicator States */
-  .v-select.open .open-indicator:before {
-    transform: rotate(315deg);
-  }
-  .v-select.loading .open-indicator {
-    opacity: 0;
-  }
-
-  /* Dropdown Toggle */
-  .v-select .dropdown-toggle {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    display: flex;
-    padding: 0 0 4px 0;
-    background: none;
-    border: 1px solid rgba(60, 60, 60, .26);
-    border-radius: 4px;
-    white-space: normal;
-  }
-  .v-select .dropdown-toggle::after {
-    display: none;
-  }
-  .v-select .vs__selected-options {
-    display: flex;
-    flex-basis: 100%;
-    flex-grow: 1;
-    flex-wrap: wrap;
-    padding: 0 2px;
-    position: relative;
-  }
-  .v-select .vs__actions {
-    display: flex;
-    align-items: stretch;
-    padding: 0 6px 0 3px;
-  }
-
-  /* Clear Button */
-  .v-select .dropdown-toggle .clear {
-    font-size: 23px;
-    font-weight: 700;
-    line-height: 1;
-    color: rgba(60, 60, 60, 0.5);
-    padding: 0;
-    border: 0;
-    background-color: transparent;
-    cursor: pointer;
-    margin-right: 6px;
-  }
-
-  /* Dropdown Toggle States */
-  .v-select.searchable .dropdown-toggle {
-    cursor: text;
-  }
-  .v-select.unsearchable .dropdown-toggle {
-    cursor: pointer;
-  }
-  .v-select.open .dropdown-toggle {
-    border-bottom-color: transparent;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-  /* Dropdown Menu */
-  .v-select .dropdown-menu {
-    display:block;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 1000;
-    min-width: 160px;
-    padding: 5px 0;
-    margin: 0;
-    width: 100%;
-    overflow-y: auto;
-    border: 1px solid rgba(0, 0, 0, .26);
-    box-shadow: 0px 3px 6px 0px rgba(0,0,0,.15);
-    border-top: none;
-    border-radius: 0 0 4px 4px;
-    text-align: left;
-    list-style: none;
-    background: #fff;
-  }
-  .v-select .dropdown-menu .optgroup-header {
-    display: block;
-    padding: 5px;
-    background: rgba(50, 50, 50, .1);
-    cursor: initial;
-  }
-  .v-select .no-options {
-    text-align: center;
-  }
-  /* Selected Tags */
-  .v-select .selected-tag {
-    display: flex;
-    align-items: center;
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    color: #333;
-    line-height: 1.42857143; /* Normalize line height */
-    margin: 4px 2px 0px 2px;
-    padding: 0 0.25em;
-    transition: opacity .25s;
-  }
-  .v-select.single .selected-tag {
-    background-color: transparent;
-    border-color: transparent;
-  }
-  .v-select.single.open .selected-tag {
-    position: absolute;
-    opacity: .4;
-  }
-  .v-select.single.searching .selected-tag {
-    display: none;
-  }
-  .v-select .selected-tag .close {
-    margin-left: 2px;
-    font-size: 1.25em;
-    appearance: none;
-    padding: 0;
-    cursor: pointer;
-    background: 0 0;
-    border: 0;
-    font-weight: 700;
-    line-height: 1;
-    color: #000;
-    text-shadow: 0 1px 0 #fff;
-    filter: alpha(opacity=20);
-    opacity: .2;
-  }
-  .v-select.single.searching:not(.open):not(.loading) input[type="search"] {
-    opacity: .2;
-  }
-  /* Search Input */
-  .v-select input[type="search"]::-webkit-search-decoration,
-  .v-select input[type="search"]::-webkit-search-cancel-button,
-  .v-select input[type="search"]::-webkit-search-results-button,
-  .v-select input[type="search"]::-webkit-search-results-decoration {
-    display: none;
-  }
-  .v-select input[type="search"]::-ms-clear {
-    display: none;
-  }
-  .v-select input[type="search"],
-  .v-select input[type="search"]:focus {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    line-height: 1.42857143;
-    font-size: 1em;
-    display: inline-block;
-    border: 1px solid transparent;
-    border-left: none;
-    outline: none;
-    margin: 4px 0 0 0;
-    padding: 0 7px;
-    max-width: 100%;
-    background: none;
-    box-shadow: none;
-    flex-grow: 1;
-    width: 0;
-    height: inherit;
-  }
-  .v-select.unsearchable input[type="search"] {
-    opacity: 1;
-  }
-  .v-select.unsearchable input[type="search"]:hover {
-    cursor: pointer;
-  }
-
-  /* List Items */
-  .v-select li {
-    line-height: 1.42857143; /* Normalize line height */
-  }
-  .v-select li > a {
-    display: block;
-    padding: 3px 5px;
-    clear: both;
-    color: #333; /* Overrides most CSS frameworks */
-    white-space: nowrap;
-  }
-  .v-select li > a.optgroup-member {
-    padding: 3px 20px;
-  }
-  .v-select li:hover {
-    cursor: pointer;
-  }
-  .v-select .dropdown-menu .active > a {
-    color: #333;
-    background: rgba(50, 50, 50, .1);
-  }
-  .v-select .dropdown-menu > .highlight > a {
-    /*
-     * required to override bootstrap 3's
-     * .dropdown-menu > li > a:hover {} styles
+    /* Rtl support - Because we're using a flexbox-based layout, the `dir="rtl"` HTML
+       attribute does most of the work for us by rearranging the child elements visually.
      */
-    background: #5897fb;
-    color: #fff;
-  }
-  .v-select .highlight:not(:last-child) {
-    margin-bottom: 0; /* Fixes Bulma Margin */
-  }
-  /* Loading Spinner */
-  .v-select .spinner {
-    align-self: center;
-    opacity: 0;
-    font-size: 5px;
-    text-indent: -9999em;
-    overflow: hidden;
-    border-top: .9em solid rgba(100, 100, 100, .1);
-    border-right: .9em solid rgba(100, 100, 100, .1);
-    border-bottom: .9em solid rgba(100, 100, 100, .1);
-    border-left: .9em solid rgba(60, 60, 60, .45);
-    transform: translateZ(0);
-    animation: vSelectSpinner 1.1s infinite linear;
-    transition: opacity .1s;
-  }
-  .v-select .spinner,
-  .v-select .spinner:after {
-    border-radius: 50%;
-    width: 5em;
-    height: 5em;
-  }
+    .v-select[dir="rtl"] .vs__actions {
+        padding: 0 3px 0 6px;
+    }
 
-  /* Disabled state */
-  .v-select.disabled .dropdown-toggle,
-  .v-select.disabled .dropdown-toggle .clear,
-  .v-select.disabled .dropdown-toggle input,
-  .v-select.disabled .selected-tag .close,
-  .v-select.disabled .open-indicator {
-    cursor: not-allowed;
-    background-color: rgb(248, 248, 248);
-  }
+    .v-select[dir="rtl"] .dropdown-toggle .clear {
+        margin-left: 6px;
+        margin-right: 0;
+    }
 
-  /* Loading Spinner States */
-  .v-select.loading .spinner {
-    opacity: 1;
-  }
-  /* KeyFrames */
-  @-webkit-keyframes vSelectSpinner {
-    0% {
-      transform: rotate(0deg);
+    .v-select[dir="rtl"] .selected-tag .close {
+        margin-left: 0;
+        margin-right: 2px;
     }
-    100% {
-      transform: rotate(360deg);
+
+    .v-select[dir="rtl"] .dropdown-menu {
+        text-align: right;
     }
-  }
-  @keyframes vSelectSpinner {
-    0% {
-      transform: rotate(0deg);
+
+    /* Open Indicator */
+    .v-select .open-indicator {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        pointer-events: all;
+        transition: all 150ms cubic-bezier(1.000, -0.115, 0.975, 0.855);
+        transition-timing-function: cubic-bezier(1.000, -0.115, 0.975, 0.855);
+        opacity: 1;
+        width: 12px; /* To account for extra width from rotating. */
     }
-    100% {
-      transform: rotate(360deg);
+
+    .v-select .open-indicator:before {
+        border-color: rgba(60, 60, 60, .5);
+        border-style: solid;
+        border-width: 3px 3px 0 0;
+        content: '';
+        display: inline-block;
+        height: 10px;
+        width: 10px;
+        vertical-align: text-top;
+        transform: rotate(133deg);
+        transition: all 150ms cubic-bezier(1.000, -0.115, 0.975, 0.855);
+        transition-timing-function: cubic-bezier(1.000, -0.115, 0.975, 0.855);
+        box-sizing: inherit;
     }
-  }
-  /* Dropdown Default Transition */
-  .fade-enter-active,
-  .fade-leave-active {
-    transition: opacity .15s cubic-bezier(1.0, 0.5, 0.8, 1.0);
-  }
-  .fade-enter,
-  .fade-leave-to {
-    opacity: 0;
-  }
+
+    /* Open Indicator States */
+    .v-select.open .open-indicator:before {
+        transform: rotate(315deg);
+    }
+
+    .v-select.loading .open-indicator {
+        opacity: 0;
+    }
+
+    /* Dropdown Toggle */
+    .v-select .dropdown-toggle {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        display: flex;
+        padding: 0 0 4px 0;
+        background: none;
+        border: 1px solid rgba(60, 60, 60, .26);
+        border-radius: 4px;
+        white-space: normal;
+    }
+
+    .v-select .dropdown-toggle::after {
+        display: none;
+    }
+
+    .v-select .vs__selected-options {
+        display: flex;
+        flex-basis: 100%;
+        flex-grow: 1;
+        flex-wrap: wrap;
+        padding: 0 2px;
+        position: relative;
+    }
+
+    .v-select .vs__actions {
+        display: flex;
+        align-items: stretch;
+        padding: 0 6px 0 3px;
+    }
+
+    /* Clear Button */
+    .v-select .dropdown-toggle .clear {
+        font-size: 23px;
+        font-weight: 700;
+        line-height: 1;
+        color: rgba(60, 60, 60, 0.5);
+        padding: 0;
+        border: 0;
+        background-color: transparent;
+        cursor: pointer;
+        margin-right: 6px;
+    }
+
+    /* Dropdown Toggle States */
+    .v-select.searchable .dropdown-toggle {
+        cursor: text;
+    }
+
+    .v-select.unsearchable .dropdown-toggle {
+        cursor: pointer;
+    }
+
+    .v-select.open .dropdown-toggle {
+        border-bottom-color: transparent;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    /* Dropdown Menu */
+    .v-select .dropdown-menu {
+        display: block;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        z-index: 1000;
+        min-width: 160px;
+        padding: 5px 0;
+        margin: 0;
+        width: 100%;
+        overflow-y: auto;
+        border: 1px solid rgba(0, 0, 0, .26);
+        box-shadow: 0px 3px 6px 0px rgba(0, 0, 0, .15);
+        border-top: none;
+        border-radius: 0 0 4px 4px;
+        text-align: left;
+        list-style: none;
+        background: #fff;
+    }
+
+    .v-select .dropdown-menu .optgroup-header {
+        display: block;
+        padding: 5px;
+        background: rgba(50, 50, 50, .1);
+        cursor: initial;
+    }
+
+    .v-select .no-options {
+        text-align: center;
+    }
+
+    /* Selected Tags */
+    .v-select .selected-tag {
+        display: flex;
+        align-items: center;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        color: #333;
+        line-height: 1.42857143; /* Normalize line height */
+        margin: 4px 2px 0px 2px;
+        padding: 0 0.25em;
+        transition: opacity .25s;
+    }
+
+    .v-select.single .selected-tag {
+        background-color: transparent;
+        border-color: transparent;
+    }
+
+    .v-select.single.open .selected-tag {
+        position: absolute;
+        opacity: .4;
+    }
+
+    .v-select.single.searching .selected-tag {
+        display: none;
+    }
+
+    .v-select .selected-tag .close {
+        margin-left: 2px;
+        font-size: 1.25em;
+        appearance: none;
+        padding: 0;
+        cursor: pointer;
+        background: 0 0;
+        border: 0;
+        font-weight: 700;
+        line-height: 1;
+        color: #000;
+        text-shadow: 0 1px 0 #fff;
+        filter: alpha(opacity=20);
+        opacity: .2;
+    }
+
+    .v-select.single.searching:not(.open):not(.loading) input[type="search"] {
+        opacity: .2;
+    }
+
+    /* Search Input */
+    .v-select input[type="search"]::-webkit-search-decoration,
+    .v-select input[type="search"]::-webkit-search-cancel-button,
+    .v-select input[type="search"]::-webkit-search-results-button,
+    .v-select input[type="search"]::-webkit-search-results-decoration {
+        display: none;
+    }
+
+    .v-select input[type="search"]::-ms-clear {
+        display: none;
+    }
+
+    .v-select input[type="search"],
+    .v-select input[type="search"]:focus {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        line-height: 1.42857143;
+        font-size: 1em;
+        display: inline-block;
+        border: 1px solid transparent;
+        border-left: none;
+        outline: none;
+        margin: 4px 0 0 0;
+        padding: 0 7px;
+        max-width: 100%;
+        background: none;
+        box-shadow: none;
+        flex-grow: 1;
+        width: 0;
+        height: inherit;
+    }
+
+    .v-select.unsearchable input[type="search"] {
+        opacity: 1;
+    }
+
+    .v-select.unsearchable input[type="search"]:hover {
+        cursor: pointer;
+    }
+
+    /* List Items */
+    .v-select li {
+        line-height: 1.42857143; /* Normalize line height */
+    }
+
+    .v-select li > a {
+        display: block;
+        padding: 3px 5px;
+        clear: both;
+        color: #333; /* Overrides most CSS frameworks */
+        white-space: nowrap;
+    }
+
+    .v-select li > a.optgroup-member {
+        padding: 3px 20px;
+    }
+
+    .v-select li:hover {
+        cursor: pointer;
+    }
+
+    .v-select .dropdown-menu .active > a {
+        color: #333;
+        background: rgba(50, 50, 50, .1);
+    }
+
+    .v-select .dropdown-menu > .highlight > a {
+        /*
+         * required to override bootstrap 3's
+         * .dropdown-menu > li > a:hover {} styles
+         */
+        background: #5897fb;
+        color: #fff;
+    }
+
+    .v-select .highlight:not(:last-child) {
+        margin-bottom: 0; /* Fixes Bulma Margin */
+    }
+
+    /* Loading Spinner */
+    .v-select .spinner {
+        align-self: center;
+        opacity: 0;
+        font-size: 5px;
+        text-indent: -9999em;
+        overflow: hidden;
+        border-top: .9em solid rgba(100, 100, 100, .1);
+        border-right: .9em solid rgba(100, 100, 100, .1);
+        border-bottom: .9em solid rgba(100, 100, 100, .1);
+        border-left: .9em solid rgba(60, 60, 60, .45);
+        transform: translateZ(0);
+        animation: vSelectSpinner 1.1s infinite linear;
+        transition: opacity .1s;
+    }
+
+    .v-select .spinner,
+    .v-select .spinner:after {
+        border-radius: 50%;
+        width: 5em;
+        height: 5em;
+    }
+
+    /* Disabled state */
+    .v-select.disabled .dropdown-toggle,
+    .v-select.disabled .dropdown-toggle .clear,
+    .v-select.disabled .dropdown-toggle input,
+    .v-select.disabled .selected-tag .close,
+    .v-select.disabled .open-indicator {
+        cursor: not-allowed;
+        background-color: rgb(248, 248, 248);
+    }
+
+    /* Loading Spinner States */
+    .v-select.loading .spinner {
+        opacity: 1;
+    }
+
+    /* KeyFrames */
+    @-webkit-keyframes vSelectSpinner {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes vSelectSpinner {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Dropdown Default Transition */
+    .fade-enter-active,
+    .fade-leave-active {
+        transition: opacity .15s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+    }
+
+    .fade-enter,
+    .fade-leave-to {
+        opacity: 0;
+    }
 </style>
 
 <template>
-  <div :dir="dir" :class="dropdownClasses">
-    <div ref="toggle" @mousedown.prevent="toggleDropdown" class="dropdown-toggle">
+    <div :dir="dir" :class="dropdownClasses">
+        <div ref="toggle" @mousedown.prevent="toggleDropdown" class="dropdown-toggle">
 
-      <div class="vs__selected-options" ref="selectedOptions">
-        <slot v-for="option in valueAsArray" name="selected-option-container"
-              :option="(typeof option === 'object')?option:{[label]: option}" :deselect="deselect" :multiple="multiple" :disabled="disabled">
+            <div class="vs__selected-options" ref="selectedOptions">
+                <slot v-for="option in valueAsArray" name="selected-option-container"
+                      :option="(typeof option === 'object')?option:{[label]: option}" :deselect="deselect"
+                      :multiple="multiple" :disabled="disabled">
           <span class="selected-tag" v-bind:key="option.index">
             <slot name="selected-option" v-bind="(typeof option === 'object')?option:{[label]: option}">
               {{ getOptionLabel(option) }}
             </slot>
-            <button v-if="multiple" :disabled="disabled" @click="deselect(option)" type="button" class="close" aria-label="Remove option">
+            <button v-if="multiple" :disabled="disabled" @click="deselect(option)" type="button" class="close"
+                    aria-label="Remove option">
               <span aria-hidden="true">&times;</span>
             </button>
           </span>
-        </slot>
+                </slot>
 
-        <input
-                ref="search"
-                :value="search"
-                @keydown.delete="maybeDeleteValue"
-                @keyup.esc="onEscape"
-                @keydown.up.prevent="typeAheadUp"
-                @keydown.down.prevent="typeAheadDown"
-                @keydown.enter.prevent="typeAheadSelect"
-                @keydown.tab="onTab"
-                @blur="onSearchBlur"
-                @focus="onSearchFocus"
-                @input="search = $event.target.value"
-                type="search"
-                class="form-control"
-                :autocomplete="autocomplete"
-                :disabled="disabled"
-                :placeholder="searchPlaceholder"
-                :tabindex="tabindex"
-                :readonly="!searchable"
-                :id="inputId"
-                role="combobox"
-                :aria-expanded="dropdownOpen"
-                aria-label="Search for option"
-        >
+                <input
+                        ref="search"
+                        :value="search"
+                        @keydown.delete="maybeDeleteValue"
+                        @keyup.esc="onEscape"
+                        @keydown.up.prevent="typeAheadUp"
+                        @keydown.down.prevent="typeAheadDown"
+                        @keydown.enter.prevent="typeAheadSelect"
+                        @keydown.tab="onTab"
+                        @blur="onSearchBlur"
+                        @focus="onSearchFocus"
+                        @input="search = $event.target.value"
+                        type="search"
+                        class="form-control"
+                        :autocomplete="autocomplete"
+                        :disabled="disabled"
+                        :placeholder="searchPlaceholder"
+                        :tabindex="tabindex"
+                        :readonly="!searchable"
+                        :id="inputId"
+                        role="combobox"
+                        :aria-expanded="dropdownOpen"
+                        aria-label="Search for option"
+                >
 
-      </div>
-      <div class="vs__actions">
-        <button
-          v-show="showClearButton"
-          :disabled="disabled"
-          @click="clearSelection"
-          type="button"
-          class="clear"
-          title="Clear selection"
-        >
-          <span aria-hidden="true">&times;</span>
-        </button>
+            </div>
+            <div class="vs__actions">
+                <button
+                        v-show="showClearButton"
+                        :disabled="disabled"
+                        @click="clearSelection"
+                        type="button"
+                        class="clear"
+                        title="Clear selection"
+                >
+                    <span aria-hidden="true">&times;</span>
+                </button>
 
-        <i v-if="!noDrop" ref="openIndicator" role="presentation" class="open-indicator"></i>
+                <i v-if="!noDrop" ref="openIndicator" role="presentation" class="open-indicator"></i>
 
-        <slot name="spinner">
-          <div class="spinner" v-show="mutableLoading">Loading...</div>
-        </slot>
-      </div>
+                <slot name="spinner">
+                    <div class="spinner" v-show="mutableLoading">Loading...</div>
+                </slot>
+            </div>
+        </div>
+
+        <transition :name="transition">
+            <ul ref="dropdownMenu" v-if="dropdownOpen" class="dropdown-menu" :style="{ 'max-height': maxHeight }"
+                role="listbox" @mousedown="onMousedown" @mouseup="onMouseup">
+                <li role="option" v-for="(option, index) in filteredOptions" v-bind:key="index"
+                    :class="{ active: isOptionSelected(option), highlight: index === typeAheadPointer }"
+                    @mouseover="typeAheadPointer = index">
+
+                    <template v-if="option.optgroup">
+                        <a v-if="option.value" @mousedown.prevent.stop="select(option)" class="optgroup-header">
+                            <slot name="option" v-bind="option">
+                                {{ getOptionLabel(option) }}
+                            </slot>
+                        </a>
+                        <span v-else class="optgroup-header">{{option.optgroup}}</span>
+                    </template>
+                    <template v-else>
+                        <a @mousedown.prevent.stop="select(option)" :class="{ 'optgroup-member': option.inoptgroup }">
+                            <slot name="option" v-bind="(typeof option === 'object')?option:{[label]: option}">
+                                {{ getOptionLabel(option) }}
+                            </slot>
+                        </a>
+                    </template>
+
+                </li>
+                <li v-if="!filteredOptions.length" class="no-options" @mousedown.stop="">
+                    <slot name="no-options">Sorry, no matching options.</slot>
+                </li>
+            </ul>
+        </transition>
     </div>
-
-    <transition :name="transition">
-      <ul ref="dropdownMenu" v-if="dropdownOpen" class="dropdown-menu" :style="{ 'max-height': maxHeight }" role="listbox" @mousedown="onMousedown" @mouseup="onMouseup">
-        <li role="option" v-for="(option, index) in filteredOptions" v-bind:key="index" :class="{ active: isOptionSelected(option), highlight: index === typeAheadPointer }" @mouseover="typeAheadPointer = index">
-
-          <template v-if="option.optgroup">
-            <a v-if="option.value" @mousedown.prevent.stop="select(option)" class="optgroup-header">
-              <slot name="option" v-bind="option">
-                {{ getOptionLabel(option) }}
-              </slot>
-            </a>
-            <span v-else class="optgroup-header">{{option.optgroup}}</span>
-          </template>
-          <template v-else>
-            <a @mousedown.prevent.stop="select(option)" :class="{ 'optgroup-member': option.inoptgroup }">
-            <slot name="option" v-bind="(typeof option === 'object')?option:{[label]: option}">
-              {{ getOptionLabel(option) }}
-            </slot>
-            </a>
-          </template>
-
-        </li>
-        <li v-if="!filteredOptions.length" class="no-options" @mousedown.stop="">
-          <slot name="no-options">Sorry, no matching options.</slot>
-        </li>
-      </ul>
-    </transition>
-  </div>
 </template>
 
 <script type="text/babel">
@@ -575,7 +618,7 @@
       getOptionLabel: {
         type: Function,
         default(option) {
-          if( this.index ) {
+          if (this.index) {
             option = this.findOptionByIndexValue(option)
           }
 
@@ -703,7 +746,7 @@
             }
             return this.filterBy(option, label, search)
           });
-        
+
         }
       },
 
@@ -848,14 +891,18 @@
     },
 
     methods: {
-      /** check if the list has elements which have 
-       *  title and a list of options, and flatten out 
+      /** check if the list has elements which have
+       *  title and a list of options, and flatten out
        */
       normaliseOptGroups(val) {
         return val.map(item => {
           if (item.title && item.options && item.options instanceof Array) {
-            return [{optgroup : true, label : item.title, value : item.option_values }].concat(item.options.map(groupitem => {
-              if(typeof groupitem !== 'object') {
+            return [{
+              optgroup: true,
+              label: item.title,
+              value: item.option_values
+            }].concat(item.options.map(groupitem => {
+              if (typeof groupitem !== 'object') {
                 groupitem = {[this.label]: groupitem}
               }
               groupitem.inoptgroup = true
@@ -866,7 +913,7 @@
           }
         }).reduce((arr, group) => {
           return arr.concat(group)
-        },[])
+        }, [])
       },
       /**
        * Select a given option.
@@ -878,11 +925,11 @@
           if (this.taggable && !this.optionExists(option)) {
             option = this.createOption(option)
           }
-          if(this.index) {
+          if (this.index) {
             if (!option.hasOwnProperty(this.index)) {
               return console.warn(
-                  `[vue-select warn]: Index key "option.${this.index}" does not` +
-                  ` exist in options object ${JSON.stringify(option)}.`
+                `[vue-select warn]: Index key "option.${this.index}" does not` +
+                ` exist in options object ${JSON.stringify(option)}.`
               )
             }
             option = option[this.index]
@@ -952,7 +999,7 @@
        */
       toggleDropdown(e) {
         if (e.target === this.$refs.openIndicator || e.target === this.$refs.search || e.target === this.$refs.toggle ||
-            e.target.classList.contains('selected-tag') || e.target === this.$el) {
+          e.target.classList.contains('selected-tag') || e.target === this.$el) {
           if (this.open) {
             this.$refs.search.blur() // dropdown will close on blur
           } else {
@@ -986,7 +1033,7 @@
        * @returns {boolean}
        */
       optionObjectComparator(value, option) {
-        if (value === option) {
+        if (this.isEquivalent(value, option)) {
           return true
         } else if (this.index && value === option[this.index]) {
           return true
@@ -996,6 +1043,39 @@
           return true
         }
         return false;
+      },
+
+      /**
+       * Determine if two objects are equal (simple approach!).
+       *
+       * @param a {Object}
+       * @param b {Object}
+       * @returns {boolean}
+       */
+      isEquivalent(a, b) {
+        // Create arrays of property names
+        var aProps = Object.getOwnPropertyNames(a);
+        var bProps = Object.getOwnPropertyNames(b);
+
+        // If number of properties is different,
+        // objects are not equivalent
+        if (aProps.length !== bProps.length) {
+          return false;
+        }
+
+        for (var i = 0; i < aProps.length; i++) {
+          var propName = aProps[i];
+
+          // If values of same property are not equal,
+          // objects are not equivalent
+          if (a[propName] !== b[propName]) {
+            return false;
+          }
+        }
+
+        // If we made it this far, objects
+        // are considered equivalent
+        return true;
       },
 
       /**
@@ -1044,7 +1124,7 @@
           return
         }
         // Fixed bug where no-options message could not be closed
-        if(this.search.length === 0 && this.options.length === 0){
+        if (this.search.length === 0 && this.options.length === 0) {
           this.closeSearchOptions()
           return
         }
@@ -1055,7 +1135,7 @@
        * @emits  {search:blur}
        * @returns {void}
        */
-      closeSearchOptions(){
+      closeSearchOptions() {
         this.open = false
         this.$emit('search:blur')
       },
@@ -1215,9 +1295,9 @@
       isValueEmpty() {
         if (this.mutableValue) {
           if (typeof this.mutableValue === 'object') {
-            return ! Object.keys(this.mutableValue).length
+            return !Object.keys(this.mutableValue).length
           }
-          return ! this.valueAsArray.length
+          return !this.valueAsArray.length
         }
 
         return true;
