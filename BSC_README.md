@@ -7,5 +7,9 @@ To build the dist version, open a shell, go to project root and execute:
  ```bash
  $ npm run-script build
  ```
+or alternatively:
+```bash
+ $ yarn run build
+ ```
 It will build .js and .map files which can then be committed.
 
