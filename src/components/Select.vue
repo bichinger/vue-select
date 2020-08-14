@@ -739,6 +739,10 @@
       filter: {
         "type": Function,
         default(options, search) {
+          if (options === undefined) {
+            console.trace("filter with undefined options", search);
+            return [];
+          }
           return options.filter((option) => {
             let label = this.getOptionLabel(option)
             if (typeof label === 'number') {
